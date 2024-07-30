@@ -1,36 +1,37 @@
-// import { useState } from 'react'
+import { createRoot } from 'react-dom/client'
 
-import { createRoot } from 'react-dom/client';
-
-
-let state: any, setState: any;
+const INITIALIZATION = Symbol('phase.initialization');
+const UPDATE = Symbol('phase.update')
+type Phase = typeof INITIALIZATION | typeof UPDATE
+let phase: Phase
+let state: any, setState: any
 
 function useState<State>(initialState: State) {
-	if (state === undefined) {
-		state = initialState;
+	// 🐨 change this to check whether the phase is INITIALIZATION
+	if (state === INITIALIZATION) {
+		state = initialState
 		setState = (newState: State) => {
-			state = newState;
-			appRoot.render(<Counter />)
+			state = newState
+			// 🐨 pass the UPDATE phase to render here
+			render(UPDATE)
 		}
 	}
-
 	return [state, setState] as [State, (newState: State) => void]
 }
-// an array of the state and a no-op function: () => {}
-// 🦺 note you may need to ignore some typescript errors here. We'll fix them later.
-// Feel free to make the `useState` a generic though!
 
 function Counter() {
-
-	const [count, setCount] = useState(0);
-	console.log(count, 'inside counter');
-	// 🦺 you'll get an error for this we'll fix that next
+	const [count, setCount] = useState(0)
 	const increment = () => setCount(count + 1)
+
+	const [enabled, setEnabled] = useState(true)
+	const toggle = () => setEnabled(!enabled)
 
 	return (
 		<div className="counter">
-			<h1>Playground</h1>
-			<button onClick={increment}>{count}</button>
+			<button onClick={toggle}>{enabled ? 'Disable' : 'Enable'}</button>
+			<button disabled={!enabled} onClick={increment}>
+				{count}
+			</button>
 		</div>
 	)
 }
@@ -38,4 +39,12 @@ function Counter() {
 const rootEl = document.createElement('div')
 document.body.append(rootEl)
 const appRoot = createRoot(rootEl)
-appRoot.render(<Counter />)
+
+// 🐨 accept a newPhase argument
+function render(newPhase: Phase) {
+	phase = newPhase;
+	appRoot.render(<Counter />)
+}
+
+// 🐨 call this with the INITIALIZATION phase
+render(INITIALIZATION)

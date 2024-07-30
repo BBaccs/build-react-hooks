@@ -1,11 +1,8 @@
 import { createRoot } from 'react-dom/client'
 
-// 🐨 create two Symbols for the phase: "INITIALIZATION" and "UPDATE"
-// 💯 as extra credit, give them a descriptive name
-
-// 🦺 create a type called Phase which is the typeof INITIALIZATION | typeof UPDATE
-
-// 🐨 create a variable called phase of type Phase and set it to INITIALIZATION
+const INITIALIZATION = Symbol('phase.initialization');
+const UPDATE = Symbol('phase.update')
+const Phase: typeof INITIALIZATION = INITIALIZATION;
 
 let state: any, setState: any
 
@@ -16,7 +13,7 @@ function useState<State>(initialState: State) {
 		setState = (newState: State) => {
 			state = newState
 			// 🐨 pass the UPDATE phase to render here
-			render()
+			render(UPDATE)
 		}
 	}
 	return [state, setState] as [State, (newState: State) => void]
@@ -32,6 +29,7 @@ function Counter() {
 	return (
 		<div className="counter">
 			<button onClick={toggle}>{enabled ? 'Disable' : 'Enable'}</button>
+			<h1>hi</h1>
 			<button disabled={!enabled} onClick={increment}>
 				{count}
 			</button>
@@ -44,7 +42,8 @@ document.body.append(rootEl)
 const appRoot = createRoot(rootEl)
 
 // 🐨 accept a newPhase argument
-function render() {
+function render(newPhase: Phase) {
+	phase = newPhase;
 	// 🐨 assign the phase to the newPhase
 	appRoot.render(<Counter />)
 }
