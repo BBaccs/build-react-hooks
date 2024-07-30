@@ -4,12 +4,20 @@ const INITIALIZATION = Symbol('phase.initialization')
 const UPDATE = Symbol('phase.update')
 type Phase = typeof INITIALIZATION | typeof UPDATE
 let phase: Phase
-
 let state: any, setState: any
+let hookIndex = 0;
+const states: Array<[any, (newState: any) => void]> = []
 
 function useState<State>(initialState: State) {
+	const id = hookIndex++
 	if (phase === INITIALIZATION) {
-		state = initialState
+		state[id] = [
+			initialState,
+			(newState: State) => {
+				states[id][0] = newState
+				render(UPDATE)
+			}
+		]
 		setState = (newState: State) => {
 			state = newState
 			render(UPDATE)
@@ -24,6 +32,8 @@ function Counter() {
 
 	const [enabled, setEnabled] = useState(true)
 	const toggle = () => setEnabled(!enabled)
+
+	console.log(count, state)
 
 	return (
 		<div className="counter">
@@ -40,6 +50,7 @@ document.body.append(rootEl)
 const appRoot = createRoot(rootEl)
 
 function render(newPhase: Phase) {
+	hookIndex = 0;
 	phase = newPhase
 	appRoot.render(<Counter />)
 }
