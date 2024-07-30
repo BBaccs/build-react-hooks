@@ -23,7 +23,7 @@ function useState<State>(initialState: State) {
 			render(UPDATE)
 		}
 	}
-	return [state, setState] as [State, (newState: State) => void]
+	return [state[id], setState] as [State, (newState: State) => void]
 }
 
 function Counter() {
